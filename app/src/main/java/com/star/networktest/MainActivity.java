@@ -6,6 +6,11 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import org.xmlpull.v1.XmlPullParser;
@@ -18,6 +23,7 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
 import javax.xml.parsers.SAXParserFactory;
 
@@ -90,11 +96,11 @@ public class MainActivity extends AppCompatActivity {
             try {
                 OkHttpClient okHttpClient = new OkHttpClient();
                 Request request = new Request.Builder()
-                        .url("http://192.168.1.168/get_data.xml")
+                        .url("http://192.168.1.168/get_data.json")
                         .build();
                 Response response = okHttpClient.newCall(request).execute();
                 String responseData = response.body().string();
-                parseXMLWithSAX(responseData);
+                parseJSONWithGSON(responseData);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -150,6 +156,33 @@ public class MainActivity extends AppCompatActivity {
             xmlReader.parse(new InputSource(new StringReader(xmlData)));
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void parseJSONWithJSONObject(String jsonData) {
+        try {
+            JSONArray jsonArray = new JSONArray(jsonData);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                String id = jsonObject.getString("id");
+                String name = jsonObject.getString("name");
+                String version = jsonObject.getString("version");
+                Log.d("MainActivity", "id is " + id);
+                Log.d("MainActivity", "name is " + name);
+                Log.d("MainActivity", "version is " + version);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void parseJSONWithGSON(String jsonData) {
+        Gson gson = new Gson();
+        List<App> appList = gson.fromJson(jsonData, new TypeToken<List<App>>() {}.getType());
+        for (App app: appList) {
+            Log.d("MainActivity", "id is " + app.getId());
+            Log.d("MainActivity", "name is " + app.getName());
+            Log.d("MainActivity", "version is " + app.getVersion());
         }
     }
 
