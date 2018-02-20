@@ -27,6 +27,8 @@ import java.util.List;
 
 import javax.xml.parsers.SAXParserFactory;
 
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -44,7 +46,18 @@ public class MainActivity extends AppCompatActivity {
         mSendRequest = findViewById(R.id.send_request);
         mResponseText = findViewById(R.id.response_text);
 
-        mSendRequest.setOnClickListener(v -> sendRequestWithOkHttp());
+        mSendRequest.setOnClickListener(v -> HttpUtil.sendOkHttpRequest("http://192.168.1.168/get_data.json", new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String responseData = response.body().string();
+                parseJSONWithGSON(responseData);
+            }
+        }));
     }
 
     private void sendRequestWithHttpURLConnection() {
